@@ -1,0 +1,68 @@
+spring:
+  mvc:
+    contentnegotiation:
+      defaultContentType: application/json
+
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+
+  h2:
+    console:
+      settings:
+        web-allow-others: true
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: eW91cl9qd3Rfc2VjcmV0X2tleV9zaG91bGRfYmVydmVyeV9sb25nX2FuZF9zZWN1cmVfYXRfbGVhc3RfMjU2X2JpdHM=
+  accessTokenValidity: 3600000
+
+encryption:
+  key: X3kLp9R8vTqYzM5N6Bg4WdJh7Pf2QcXA
+
+logging:
+  level:
+    org.springframework.jdbc.datasource.init: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+api:
+  upbit:
+    host: https://crix-api-cdn.upbit.com
+    path: /v1/forex/recent
+    connect-timeout: 5000
+    read-timeout: 5000
+
+server:
+  port: 8080

@@ -14,7 +14,7 @@
 7. [실행 방법](#실행-방법)
 8. [테스트 실행](#테스트-실행)
 9. [주의사항](#주의사항)
-10. [라이센스](#라이센스)
+
 
 ---
 
@@ -108,7 +108,7 @@
 
 ## API 문서
 
-- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- Swagger UI: [http://127.0.0.1:8080/swagger-ui/index.html#/](http://127.0.0.1:8080/swagger-ui/index.html#/)
 
 ## 환경 설정
 

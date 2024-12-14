@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FeeCalculatorTest {
     @InjectMocks
@@ -26,7 +27,7 @@ class FeeCalculatorTest {
         // given
         long amount = 2000;
         // (2000 * 0.002) + 1000.0 = 1004.0
-        BigDecimal expectedFee = new BigDecimal("1004.000");
+        BigDecimal expectedFee = new BigDecimal("1004.00");
 
         // when
         BigDecimal actualFee = feeCalculator.calculateFee(amount, Currency.USD);
@@ -42,7 +43,7 @@ class FeeCalculatorTest {
         long amount = 50000;
 
         // 50000 + 0.0002 + 1000
-        BigDecimal expectedFee = new BigDecimal("1100.000");
+        BigDecimal expectedFee = new BigDecimal("1100.00");
 
         // when
         BigDecimal actualFee = feeCalculator.calculateFee(amount, Currency.USD);
@@ -56,7 +57,7 @@ class FeeCalculatorTest {
     void calculateJpyFeeSuccess() {
         // given
         long amount = 10000;
-        BigDecimal expectedFee = new BigDecimal("3050.000"); // (10000 * 0.005) + 3000.0 = 3050.0
+        BigDecimal expectedFee = new BigDecimal("3050"); // (10000 * 0.005) + 3000.0 = 3050.0
 
         // when
         BigDecimal actualFee = feeCalculator.calculateFee(amount, Currency.JPY);
@@ -78,7 +79,7 @@ class FeeCalculatorTest {
         BigDecimal actualFee = feeCalculator.calculateFee(amount, Currency.USD);
 
         // then
-        assertEquals(expectedFee, actualFee);
+        assertTrue(expectedFee.compareTo(actualFee) == 0);
     }
 
 }

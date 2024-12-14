@@ -2,6 +2,9 @@ spring:
   mvc:
     contentnegotiation:
       defaultContentType: application/json
+      favorParameter: false
+      mediaTypes:
+        json: application/json
 
   http:
     encoding:
@@ -46,7 +49,7 @@ spring:
 
 jwt:
   secret: eW91cl9qd3Rfc2VjcmV0X2tleV9zaG91bGRfYmVydmVyeV9sb25nX2FuZF9zZWN1cmVfYXRfbGVhc3RfMjU2X2JpdHM=
-  accessTokenValidity: 3600000
+  accessTokenValidity: 1800000
 
 encryption:
   key: X3kLp9R8vTqYzM5N6Bg4WdJh7Pf2QcXA
@@ -57,12 +60,18 @@ logging:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-api:
-  upbit:
-    host: https://crix-api-cdn.upbit.com
-    path: /v1/forex/recent
-    connect-timeout: 5000
-    read-timeout: 5000
+webclient:
+  connect-timeout: 3000
+  read-timeout: 5000
+  max-in-memory-size: 16777216
+
+external:
+  api:
+    upbit:
+      base-url: https://crix-api-cdn.upbit.com
+      exchange-rate-path: /v1/forex/recent
+
+
 
 server:
   port: 8080

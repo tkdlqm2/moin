@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class SignUpRequest {
     @Schema(description = "이메일", example = "test@gmail.com")
     @Email(message = "유효한 이메일 주소를 입력해주세요.")
-    @NotBlank(message = "이메일은 필수 입력값입니다.")
     private String userId;
 
     @Schema(description = "비밀번호", example = "Test123!@#")
@@ -27,7 +26,7 @@ public class SignUpRequest {
     @NotBlank(message = "이름은 필수 입력값입니다.")
     private String name;
 
-    @Schema(description = "회원 유형(REG_NO: 개인회원, BUSINESS_NO: 법인회원)", example = "REG_NO")
+    @Schema(description = "회원 유형(REG_NO: 개인회원, BUSINESS_NO: 법인회원)", example = "BUSINESS_NO")
     @NotNull(message = "회원 유형은 필수 입력값입니다.")
     private IdType idType;
 

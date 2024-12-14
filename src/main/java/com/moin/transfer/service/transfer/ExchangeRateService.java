@@ -2,7 +2,9 @@ package com.moin.transfer.service.transfer;
 
 import com.moin.transfer.common.enums.Currency;
 import com.moin.transfer.common.enums.CurrencyCode;
-import com.moin.transfer.common.external.client.ExternalApiClient;
+import com.moin.transfer.common.external.client.upbit.client.UpbitApiClient;
+import com.moin.transfer.common.external.client.upbit.dto.UpbitResponse;
+import com.moin.transfer.common.external.support.error.WebClientException;
 import com.moin.transfer.exception.quote.QuoteErrorCode;
 import com.moin.transfer.exception.quote.QuoteException;
 import lombok.RequiredArgsConstructor;
@@ -10,63 +12,46 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ExchangeRateService {
-    private final ExternalApiClient externalApiClient;
+    private final UpbitApiClient upbitApiClient;
 
     public BigDecimal getExchangeRate(Currency targetCurrency) {
         try {
-            List<Map<String, Object>> response = externalApiClient
-                    .<List<Map<String, Object>>>callApi(
-                            switch (targetCurrency) {
-                                case JPY -> CurrencyCode.KRW_JPY;
-                                case USD -> CurrencyCode.KRW_USD;
-                                default -> throw new QuoteException(QuoteErrorCode.UNSUPPORTED_CURRENCY);
-                            }
-                    ).block();
+            List<UpbitResponse> response = upbitApiClient
+                    .getExchangeRate(switch (targetCurrency) {
+                        case JPY -> CurrencyCode.KRW_JPY;
+                        case USD -> CurrencyCode.KRW_USD;
+                        default -> throw new QuoteException(QuoteErrorCode.UNSUPPORTED_CURRENCY);
+                    })
+                    .block();
 
             validateResponse(response);
             return extractExchangeRate(response.get(0), targetCurrency);
+        } catch (WebClientException e) {
+            log.error("Failed to get exchange rate from API: {}", e.getMessage(), e);
+            throw new QuoteException(QuoteErrorCode.EXCHANGE_RATE_NOT_FOUND);
         } catch (Exception e) {
             log.error("Failed to get exchange rate: {}", e.getMessage(), e);
             throw new QuoteException(QuoteErrorCode.EXCHANGE_RATE_NOT_FOUND);
         }
     }
 
-    public BigDecimal getUsdExchangeRate() {
-        try {
-            List<Map<String, Object>> response = externalApiClient
-                    .<List<Map<String, Object>>>callApi(CurrencyCode.KRW_USD)
-                    .block();
-
-            validateResponse(response);
-            return new BigDecimal(response.get(0).get("basePrice").toString());
-        } catch (Exception e) {
-            log.error("Failed to get USD exchange rate: {}", e.getMessage(), e);
+    private void validateResponse(List<UpbitResponse> response) {
+        if (response == null || response.isEmpty() || !response.get(0).isValid()) {
+            log.error("Exchange rate response is empty or invalid");
             throw new QuoteException(QuoteErrorCode.EXCHANGE_RATE_NOT_FOUND);
         }
     }
 
-    private void validateResponse(List<Map<String, Object>> response) {
-        if (response == null || response.isEmpty()) {
-            log.error("Exchange rate response is empty");
-            throw new QuoteException(QuoteErrorCode.EXCHANGE_RATE_NOT_FOUND);
-        }
-    }
-
-    private BigDecimal extractExchangeRate(Map<String, Object> exchangeRate, Currency targetCurrency) {
-        BigDecimal basePrice = new BigDecimal(exchangeRate.get("basePrice").toString());
+    private BigDecimal extractExchangeRate(UpbitResponse exchangeRate, Currency targetCurrency) {
         if (targetCurrency == Currency.JPY) {
-            int currencyUnit = Integer.parseInt(exchangeRate.get("currencyUnit").toString());
-            return basePrice.divide(BigDecimal.valueOf(currencyUnit), 2, RoundingMode.HALF_UP);
+            return exchangeRate.calculateAdjustedPrice();
         }
-        return basePrice;
+        return exchangeRate.getBasePriceAsBigDecimal();
     }
 }
-

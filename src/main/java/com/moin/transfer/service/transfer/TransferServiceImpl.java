@@ -49,7 +49,7 @@ public class TransferServiceImpl implements TransferService {
         User user = userService.getCurrentUser();
         Quote quote = quoteValidator.validateAndGetQuote(request.getQuoteId());
 
-        quoteValidator.validateDailyLimit(user, quote.getTargetAmount());
+        quoteValidator.validateDailyLimit(user, quote.getTargetAmount(), quote.getTargetCurrency(), quote.getAmount());
 
         quote.markAsUsed();
         quoteRepository.save(quote);
@@ -63,7 +63,7 @@ public class TransferServiceImpl implements TransferService {
         User user = userService.getCurrentUser();
         List<Quote> todayQuotes = getTodayQuotes(user);
         List<Quote> allQuotes = getAllQuotes(user);
-        BigDecimal usdExchangeRate = exchangeRateService.getUsdExchangeRate();
+        BigDecimal usdExchangeRate = exchangeRateService.getExchangeRate(Currency.USD);
 
         return buildQuoteListResponse(user, todayQuotes, allQuotes, usdExchangeRate);
     }
@@ -77,6 +77,7 @@ public class TransferServiceImpl implements TransferService {
 
         return Quote.builder()
                 .user(user)
+                .currency(request.getTargetCurrency())
                 .amount(BigDecimal.valueOf(request.getAmount()))
                 .targetCurrency(request.getTargetCurrency())
                 .exchangeRate(exchangeRate)
@@ -128,13 +129,29 @@ public class TransferServiceImpl implements TransferService {
     private BigDecimal calculateTotalUsdAmount(List<Quote> quotes, BigDecimal usdExchangeRate) {
         return quotes.stream()
                 .map(quote -> {
-                    BigDecimal sourceAmountInKrw = quote.getAmount().subtract(quote.getFee());
+                    // 금액에서 수수료를 뺀 후 반올림
+                    BigDecimal sourceAmountInKrw = quote.getAmount()
+                            .subtract(quote.getFee())
+                            .setScale(0, RoundingMode.HALF_UP);
+
                     if (quote.getTargetCurrency() == Currency.USD) {
-                        return quote.getTargetAmount();
+                        return quote.getTargetAmount()
+                                .setScale(Currency.USD.getDefaultFractionDigits(), RoundingMode.HALF_UP);
                     }
-                    return sourceAmountInKrw.divide(usdExchangeRate, 2, RoundingMode.HALF_UP);
+
+                    int krwScale = Currency.KRW.getDefaultFractionDigits();
+
+                    // 환율 정보 반올림
+                    BigDecimal exchangeRate = usdExchangeRate.setScale(12, RoundingMode.HALF_UP);
+
+                    // 나눗셈 후 반올림
+                    return sourceAmountInKrw
+                            .divide(exchangeRate, krwScale, RoundingMode.HALF_UP)
+                            .setScale(krwScale, RoundingMode.HALF_UP);
                 })
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                // 최종 합계 반올림
+                .setScale(Currency.USD.getDefaultFractionDigits(), RoundingMode.HALF_UP);
     }
 }
 

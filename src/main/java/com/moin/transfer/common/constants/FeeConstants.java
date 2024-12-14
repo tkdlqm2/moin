@@ -18,10 +18,10 @@ public class FeeConstants {
     public static final long USD_TIER1_LIMIT = 1400000; // $1 = 1400 원 기준
 
     // 개인회원 일일 송금 한도
-    public static final BigDecimal INDIVIDUAL_DAILY_LIMIT = new BigDecimal("1400000");
+    public static final BigDecimal INDIVIDUAL_DAILY_LIMIT = new BigDecimal("1000"); // 달러 기준
 
     // 법인회원 일일 송금 한도
-    public static final BigDecimal BUSINESS_DAILY_LIMIT = new BigDecimal("7000000");
+    public static final BigDecimal BUSINESS_DAILY_LIMIT = new BigDecimal("5000"); // 달러 기준
 }
 
 

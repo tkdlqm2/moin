@@ -14,7 +14,7 @@ public enum QuoteErrorCode implements CommonErrorCodeType {
     UNSUPPORTED_CURRENCY("UNSUPPORTED_CURRENCY", "지원하지 않는 통화입니다.", HttpStatus.BAD_REQUEST),
     EXCHANGE_RATE_NOT_FOUND("EXCHANGE_RATE_NOT_FOUND", "환율 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     QUOTE_NOT_FOUND("QUOTE_NOT_FOUND", "견적서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
-    DAILY_LIMIT_EXCEEDED("DAILY_LIMIT_EXCEEDED", "일일 송금 한도를 초과하였습니다.", HttpStatus.BAD_REQUEST);
+    LIMIT_EXCESS("LIMIT_EXCESS", "일일 송금 한도를 초과하였습니다.", HttpStatus.BAD_REQUEST);
 
 
     private final String errorCode;

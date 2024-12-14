@@ -106,7 +106,7 @@ class TransferServiceImplTest {
 
         // then
         assertTrue(response.isSuccess());
-        verify(quoteValidator).validateDailyLimit(user, quote.getTargetAmount());
+        verify(quoteValidator).validateDailyLimit(user, quote.getTargetAmount(), quote.getCurrency(), quote.getAmount());
         verify(quoteRepository).save(quote);
     }
 
@@ -124,14 +124,14 @@ class TransferServiceImplTest {
 
         when(userService.getCurrentUser()).thenReturn(user);
         when(quoteValidator.validateAndGetQuote(quoteId)).thenReturn(quote);
-        doThrow(new QuoteException(QuoteErrorCode.DAILY_LIMIT_EXCEEDED))
-                .when(quoteValidator).validateDailyLimit(user, quote.getTargetAmount());
+        doThrow(new QuoteException(QuoteErrorCode.LIMIT_EXCESS))
+                .when(quoteValidator).validateDailyLimit(user, quote.getTargetAmount(), quote.getCurrency(), quote.getAmount());
 
         // when
         QuoteException exception = assertThrows(QuoteException.class,
                 () -> transferService.requestQuote(request));
 
         // then
-        assertEquals(QuoteErrorCode.DAILY_LIMIT_EXCEEDED, exception.getCommonErrorCodeType());
+        assertEquals(QuoteErrorCode.LIMIT_EXCESS, exception.getCommonErrorCodeType());
     }
 }

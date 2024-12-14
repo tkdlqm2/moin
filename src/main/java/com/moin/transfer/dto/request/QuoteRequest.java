@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class QuoteRequest {
 
-    @Schema(description = "amount", example = "10000")
+    @Schema(description = "amount", example = "6900000")
     @Positive(message = "송금액은 양수여야 합니다")
     private Long amount;
 

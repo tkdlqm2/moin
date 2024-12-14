@@ -25,6 +25,10 @@ public class Quote extends BaseEntity {
 
     private BigDecimal amount;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Currency currency;
+
     @Enumerated(EnumType.STRING)
     private Currency targetCurrency;
 
@@ -46,7 +50,7 @@ public class Quote extends BaseEntity {
 
     @Builder
     public Quote(User user, BigDecimal amount, Currency targetCurrency, BigDecimal exchangeRate,
-                 BigDecimal fee, BigDecimal targetAmount, LocalDateTime expireTime, boolean used) {
+                 BigDecimal fee, BigDecimal targetAmount, LocalDateTime expireTime, boolean used, Currency currency) {
         this.user = user;
         if (user != null) {
             user.getQuotes().add(this);  // 양방향 관계 설정
@@ -58,6 +62,7 @@ public class Quote extends BaseEntity {
         this.targetAmount = targetAmount;
         this.expireTime = expireTime;
         this.used = used;
+        this.currency = currency;
     }
 
     public void markAsUsed() {

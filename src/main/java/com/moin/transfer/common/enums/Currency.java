@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum Currency {
+    KRW(0),
     JPY(0),
     USD(2);
 

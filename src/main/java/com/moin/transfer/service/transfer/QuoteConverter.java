@@ -1,5 +1,6 @@
 package com.moin.transfer.service.transfer;
 
+import com.moin.transfer.common.enums.Currency;
 import com.moin.transfer.dto.response.QuoteData;
 import com.moin.transfer.dto.response.TransferHistory;
 import com.moin.transfer.entity.Quote;
@@ -38,7 +39,7 @@ public class QuoteConverter {
 
     private static TransferHistory toTransferHistory(Quote quote, BigDecimal usdExchangeRate) {
         BigDecimal sourceAmountInKrw = quote.getAmount().subtract(quote.getFee());
-        BigDecimal usdAmount = sourceAmountInKrw.divide(usdExchangeRate, 2, RoundingMode.HALF_UP);
+        BigDecimal usdAmount = sourceAmountInKrw.divide(usdExchangeRate, Currency.USD.getDefaultFractionDigits(), RoundingMode.HALF_UP);
 
         return TransferHistory.builder()
                 .sourceAmount(quote.getAmount())

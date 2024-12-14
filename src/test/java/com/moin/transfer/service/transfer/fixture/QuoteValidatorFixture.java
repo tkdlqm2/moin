@@ -29,7 +29,6 @@ public class QuoteValidatorFixture {
 
     public static User createIndividualUser(Long userId) {
         return User.builder()
-                .id(userId)
                 .idType(IdType.REG_NO)
                 .build();
     }

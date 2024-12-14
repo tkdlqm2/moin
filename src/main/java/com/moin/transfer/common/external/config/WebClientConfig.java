@@ -8,39 +8,40 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import org.springframework.http.codec.ClientCodecConfigurer;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
-import java.util.Collections;
 
 @Configuration
+@EnableConfigurationProperties(WebClientProperties.class)
 @RequiredArgsConstructor
-@EnableConfigurationProperties(ExternalApiProperties.class)
 public class WebClientConfig {
-    private final ExternalApiProperties properties;
-    @Bean
-    public WebClient webClient() {
-        HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getConnectTimeout())
-                .responseTimeout(Duration.ofMillis(properties.getReadTimeout()))
-                .wiretap(true);
+    private final WebClientProperties properties;
 
-        return WebClient.builder()
-                .baseUrl(properties.getHost())
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .codecs(this::configureCodecs)
-                .defaultHeaders(this::configureDefaultHeaders)
+    @Bean
+    public HttpClient httpClient() {
+        return HttpClient.create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, properties.getConnectTimeout())
+                .responseTimeout(Duration.ofMillis(properties.getReadTimeout()));
+    }
+
+    @Bean
+    public ExchangeStrategies exchangeStrategies() {
+        return ExchangeStrategies.builder()
+                .codecs(configurer -> configurer
+                        .defaultCodecs()
+                        .maxInMemorySize(properties.getMaxInMemorySize()))
                 .build();
     }
 
-    private void configureCodecs(ClientCodecConfigurer configurer) {
-        configurer.defaultCodecs().maxInMemorySize(16 * 1024 * 1024);
-    }
-
-    private void configureDefaultHeaders(HttpHeaders headers) {
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+    @Bean
+    public WebClient webClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies) {
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .exchangeStrategies(exchangeStrategies)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
     }
 }
